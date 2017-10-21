@@ -21,11 +21,15 @@ var currAnswer;
 var gotCorrect = false;
 var paperToDestroy;
 var previousCheckpoint = 0;
+var random;
+var confirmButton;
+var newItem;
 
 var startButton;
 var mysteryBox;
 var graphics;
 var playing = false;
+var content;
 
 var playerGroup;
 var obstacleGroup;
@@ -33,6 +37,7 @@ var itemGroup;
 var uiGroup;
 var factMenuGroup;
 var quizMenuGroup;
+var boxGroup;
 
 var upperBound = HEIGHT / 2 - HEIGHT / 3;
 var lowerBound = upperBound + HEIGHT;
@@ -42,11 +47,14 @@ var lowerLine;
 var roomLines = [];
 var papers = [];
 var obstacles = [];
+var evolutionTypes = ['clown','beluga', 'dolphin','blacktip','mako', 'hammerhead','greatwhite', 'killer'];
+var evolutionHats = ['clownhat','belugahat', 'dolphinhat','blacktiphat','makohat', 'hammerheadhat','greatwhitehat', 'killerhat'];
 var obstacleTypes = ['oil', 'bag', 'tire', 'trash'];
-var evolution = ['animatedFish', 'clownfish', 'crab', 'octopus', 'dolphin', 'greatwhite', 'killerwhale']
+var evolution = ['animatedFish', 'clown', 'crab', 'octopus', 'dolphin', 'greatwhite', 'killer']
 
 var factMenu = {};
 var quizMenu = {};
+var boxMenu = {};
 
 var Player = function(game, x, y, rot) {
     this.game = game;
@@ -142,19 +150,35 @@ function preload() {
     game.load.image('crab', 'assets/Crab.png');
     game.load.image('tire', 'assets/tire.png');
     game.load.image('trash', 'assets/trash.png');
-    game.load.image('clownfish', 'assets/clown fish.png');
     game.load.image('octopus', 'assets/octopus.png');
     game.load.image('dolphin', 'assets/dolphin.png');
-    game.load.image('makoshark', 'assets/mako-shark-silo.png');
     game.load.image('hammerhead', 'assets/hammerhead.png');
-    game.load.image('killerwhale', 'assets/killer whale.png');
-    game.load.image('greatwhite', 'assets/great white.png');
     game.load.spritesheet('start', 'assets/start2.png', 120, 40); 
     game.load.spritesheet('mystery', 'assets/chest.png', 48, 38);
     game.load.image('paper', 'assets/paper.png');
     game.load.image('spongebob', 'assets/spongebob.png');
-    game.load.spritesheet('water', 'assets/water.png', 32, 400, 32)
+    game.load.spritesheet('water', 'assets/water.png', 32, 400, 32);
+    game.load.spritesheet('confirm','assets/confirm.png',109,29);
     game.load.bitmapFont('font', 'assets/font.png', 'assets/font.fnt');
+    game.load.image('beluga', 'assets/beluga.png');
+    game.load.image('blacktip', 'assets/blacktip-shark.png');
+    game.load.image('clown', 'assets/clownfish.png');
+    game.load.image('dolphin', 'assets/dolphin.png');
+    game.load.image('greatwhite', 'assets/greatwhite.png');
+    game.load.image('hammerhead', 'assets/hammerhead.png');
+    game.load.image('killer', 'assets/killerwhale.png');
+    game.load.image('mako', 'assets/mako.png');
+    game.load.image('octopus', 'assets/octopus.png');
+    game.load.image('belugahat', 'assets/belugahat.png');
+    game.load.image('blacktiphat', 'assets/blacktip-sharkhat.png');
+    game.load.image('clownhat', 'assets/clownfishhat.png');
+    game.load.image('dolphinhat', 'assets/dolphinhat.png');
+    game.load.image('greatwhitehat', 'assets/greatwhitehat.png');
+    game.load.image('hammerheadhat', 'assets/hammerheadhat.png');
+    game.load.image('killerhat', 'assets/killerwhalehat.png');
+    game.load.image('makohat', 'assets/makohat.png');
+    game.load.image('octopushat', 'assets/octopushat.png');
+    game.load.image('newitem', 'assets/newitem.png');
 }
 
 function create() {
@@ -205,6 +229,7 @@ function createLayers() {
     uiGroup = game.add.group();
     factMenuGroup = game.add.group();
     quizMenuGroup = game.add.group();
+    boxGroup = game.add.group();
 
     game.world.bringToTop(obstacleGroup);
     game.world.bringToTop(itemGroup);
@@ -212,9 +237,11 @@ function createLayers() {
     game.world.bringToTop(uiGroup);
     game.world.bringToTop(factMenuGroup);
     game.world.bringToTop(quizMenuGroup);
+    game.world.bringToTop(boxGroup);
 
     factMenuGroup.visible = false;
     quizMenuGroup.visible = false;
+    boxGroup.visible = false;
 }
 
 function createBorderLines(graphics) {
@@ -475,7 +502,28 @@ function actionOnClick () {
 }
 
 function boxOpen(){
-    playing = true;
+    boxMenu.background = game.add.sprite(0, 0, 'white');
+    boxMenu.background.width = game.camera.width * 0.75;
+    boxMenu.background.height = game.camera.height * 0.75;
+    boxMenu.background.x = game.camera.width * 0.125;
+    boxMenu.background.y = game.camera.height * 0.125;
+    boxGroup.add(boxMenu.background);
+    boxGroup.visible = true;
+    mysteryBox.destroy();
+    newItem = game.add.sprite(game.camera.width/2-175,game.camera.height/2-300,'newitem');
+    content = game.add.sprite(game.camera.width/2,game.camera.height/2, evolutionHats[getRandIntBetween(0,8)]);
+    content.width = 400;
+    content.height = 300;
+    content.anchor.set(0.5,0.5);
+    confirmButton = game.add.button(game.camera.width/2,game.camera.height/2+165,'confirm',confirmClick, 3,2,3);
+    confirmButton.anchor.set(0.5,0.5);
+}
+
+function confirmClick(){
+    confirmButton.destroy();
+    content.destroy();
+    newItem.destroy();
+    boxGroup.visible = false;
 }
 function updateCollisions() {
     var xPos = player.sprite.x;
