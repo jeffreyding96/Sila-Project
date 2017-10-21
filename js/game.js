@@ -56,6 +56,9 @@ var factMenu = {};
 var quizMenu = {};
 var boxMenu = {};
 
+var points = 0;
+var scoreCounter;
+
 var Player = function(game, x, y, rot) {
     this.game = game;
     this.x = x;
@@ -195,6 +198,12 @@ function create() {
     player = new Player(game, 0, HEIGHT / 2, 0);
     playerGroup.add(player.sprite);
     game.camera.follow(player.sprite);
+
+    scoreCounter = game.add.bitmapText(0, 0, 'font', '0', 48);
+    scoreCounter.fixedToCamera = true;
+    scoreCounter.cameraOffset.x = 25;
+    scoreCounter.cameraOffset.y = 20;
+    uiGroup.add(scoreCounter);
 
     graphics = game.add.graphics(0, 0);
     graphics.lineStyle(5, 0xffffff, 1);
@@ -359,6 +368,7 @@ function createFactMenu() {
         if (gotCorrect) {
             gotCorrect = false;
             papers.splice(paperToDestroy, 1);
+            points += 5;
             goNextRoom();
             return;
         }
@@ -493,6 +503,8 @@ function update() {
     for (var i = 0; i < obstacles.length; i++) {
         obstacles[i].update();
     }
+
+    scoreCounter.text = points;
 }
 
 function actionOnClick () {
@@ -614,6 +626,8 @@ function handleObstacles() {
 
             playing = false;
             factMenuGroup.visible = true;
+
+            points -= 2;
         }
     }
 }
