@@ -236,7 +236,7 @@ function createObstacles() {
         for (var i = 0; i < 4; i++) {
             var randX;
             while (true) {
-                randX = getRandIntBetween(count, count + roomWidth - 300);
+                randX = getRandIntBetween(count, count + roomWidth - 400);
                 var tooClose = false;
                 if (obstacles.length == 0) {
                     break;
@@ -296,6 +296,12 @@ function createFactMenu() {
     factMenu.okay.events.onInputDown.add(function() {
         playing = true;
         factMenuGroup.visible = false;
+        for (var i = 0; i < obstacles.length; i++) {
+            obstacles[i].sprite.x = obstacles[i].x;
+            obstacles[i].sprite.y = obstacles[i].y;
+            obstacles[i].changeDirectionTime = game.time.now;
+            obstacles[i].moveUp = true;
+        }
         if (gotCorrect) {
             gotCorrect = false;
             papers.splice(paperToDestroy, 1);
@@ -303,12 +309,6 @@ function createFactMenu() {
             return;
         }
         player.sprite.x = game.camera.x;
-        for (var i = 0; i < obstacles.length; i++) {
-            obstacles[i].sprite.x = obstacles[i].x;
-            obstacles[i].sprite.y = obstacles[i].y;
-            obstacles[i].changeDirectionTime = game.time.now;
-            obstacles[i].moveUp = true;
-        }
     }, this);
 
     factMenuGroup.add(factMenu.background);
