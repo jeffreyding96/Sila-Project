@@ -20,6 +20,7 @@ var lowerLine;
 
 var roomLines = [];
 var papers = [];
+var obstacles = [];
 
 var Player = function(game, x, y, rot) {
     this.game = game;
@@ -28,6 +29,7 @@ var Player = function(game, x, y, rot) {
     this.sprite = game.add.sprite(x, y, 'fish');
     this.sprite.width = 50;
     this.sprite.height = 50;
+    this.sprite.rotation = rot;
 
     Player.prototype.update = function() {
         this.checkMovement();
@@ -50,11 +52,45 @@ var Player = function(game, x, y, rot) {
     }
 }
 
+var Obstacle = function(game, x, y, rot, changeTime, speed) {
+    this.game = game;
+    this.x = x;
+    this.y = y;
+    this.speed = speed;
+    this.sprite = game.add.sprite(x, y, 'spongebob');
+    this.sprite.width = 100;
+    this.sprite.height = 150;
+    this.sprite.rotation = rot;
+    this.changeDirectionTime = game.time.now;
+    this.changeDirectionDelay = changeTime;
+    this.moveUp = true;
+
+    Obstacle.prototype.update = function() {
+        this.move();
+    }
+
+    Obstacle.prototype.move = function() {
+        if (game.time.now > this.changeDirectionTime + this.changeDirectionDelay) {
+            this.moveUp = !this.moveUp;
+            this.changeDirectionTime = game.time.now;
+        }
+        var movement = this.speed;
+
+        if (this.moveUp) {
+            this.sprite.y += movement;
+        }
+        else {
+            this.sprite.y -= movement;
+        }
+    }
+}
+
 function preload() {
     game.load.image('earth', 'assets/light_sand.png');
     game.load.image('water', 'assets/water.png');
     game.load.image('fish', 'assets/fish.png');
     game.load.image('paper', 'assets/paper.png');
+    game.load.image('spongebob', 'assets/spongebob.png');
 }
 
 function create() {
@@ -69,9 +105,8 @@ function create() {
     createLayers();
 
     player = new Player(game, 0, HEIGHT / 2, 0);
-    game.camera.follow(player.sprite);
-
     playerGroup.add(player.sprite);
+    game.camera.follow(player.sprite);
 
     graphics = game.add.graphics(0, 0);
     graphics.lineStyle(5, 0xffffff, 1);
@@ -80,6 +115,7 @@ function create() {
     createBorderLines(graphics);
     createRoomLines(graphics);
     createPapers();
+    createObstacles();
 }
 
 function createLayers() {
@@ -124,9 +160,27 @@ function createPapers() {
     }
 }
 
+function createObstacles() {
+    var count = 150;
+    while (count < WIDTH) {
+        for (var i = 0; i < 4; i++) {
+            var randX = getRandBetween(count, count + roomWidth - 150);
+            var randY = getRandBetween(upperBound - 100, lowerBound - 200);
+            var obs = new Obstacle(game, randX, randY, 0, getRandBetween(500, 2000), getRandBetween(2, 5));
+            obstacles.push(obs);
+            obstacleGroup.add(obs.sprite);
+        }
+        count += roomWidth;
+    }
+}
+
 function update() {
     player.update();
     updateCollisions();
+
+    for (var i = 0; i < obstacles.length; i++) {
+        obstacles[i].update();
+    }
 }
 
 function updateCollisions() {
@@ -147,4 +201,8 @@ function updateCollisions() {
 }
 
 function render() {
+}
+
+function getRandBetween(x, y) {
+    return Math.random() * (y - x) + x;
 }
