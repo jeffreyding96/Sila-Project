@@ -87,14 +87,14 @@ var Obstacle = function(game, x, y, rot, changeTime, speed) {
 
 function preload() {
     game.load.image('earth', 'assets/light_sand.png');
-    game.load.image('water', 'assets/water.png');
+    game.load.image('waterSprite', 'assets/waterSprite.png');
     game.load.image('fish', 'assets/fish.png');
     game.load.image('paper', 'assets/paper.png');
     game.load.image('spongebob', 'assets/spongebob.png');
 }
 
 function create() {
-    land = game.add.tileSprite(0, 0, WIDTH, HEIGHT * 2, 'water');
+    land = game.add.tileSprite(0, 0, WIDTH, HEIGHT * 2, 'waterSprite');
 
     game.world.setBounds(0, 0, WIDTH, HEIGHT);
     game.stage.disableVisibilityChange = true;
