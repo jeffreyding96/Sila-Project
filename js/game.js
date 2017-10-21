@@ -2,6 +2,30 @@ var game = new Phaser.Game("100%", "100%", Phaser.AUTO, 'game', {preload: preloa
 var WIDTH = 2000;
 var HEIGHT = 2000;
 
+
+function homeload() {
+    game.load.spritesheet('water', 'assets/water.png', 32, 400, 32)
+}
+
+var background
+
+background = game.add.tileSprite(0, 24*16, 128*16, 24*16, 'waters')
+
+background.animations.add('waves0', [0, 1, 2, 3, 2, 1]);
+    background.animations.add('waves1', [4, 5, 6, 7, 6, 5]);
+    background.animations.add('waves2', [8, 9, 10, 11, 10, 9]);
+    background.animations.add('waves3', [12, 13, 14, 15, 14, 13]);
+    background.animations.add('waves4', [16, 17, 18, 19, 18, 17]);
+    background.animations.add('waves5', [20, 21, 22, 23, 22, 21]);
+    background.animations.add('waves6', [24, 25, 26, 27, 26, 25]);
+    background.animations.add('waves7', [28, 29, 30, 31, 30, 29]);
+
+var n = 7;
+background.animations.play('waves' + n, 8, true);
+}
+/*When the start button is clicked the game begins...*/
+
+
 var player;
 var land;
 
