@@ -5,6 +5,9 @@ var HEIGHT = 500;
 var player;
 var land;
 
+var upperBound = HEIGHT / 2 - HEIGHT / 3;
+var lowerBound = upperBound + HEIGHT;
+
 var Player = function(game, x, y, rot) {
     this.game = game;
     this.x = x;
@@ -40,9 +43,10 @@ function preload() {
 }
 
 function create() {
-    land = game.add.tileSprite(0, HEIGHT / 2 - HEIGHT / 3, WIDTH, HEIGHT, 'earth');
+    land = game.add.tileSprite(0, upperBound, WIDTH, HEIGHT, 'earth');
 
-    game.world.setBounds(0, 0, WIDTH, HEIGHT);
+    game.world.setBounds(0, 0, WIDTH, HEIGHT / 2);
+
     game.stage.disableVisibilityChange = true;
     game.canvas.oncontextmenu = function (e) {
         e.preventDefault();
@@ -55,8 +59,25 @@ function create() {
 
 function update() {
     player.update();
+    updateCollisions();
 }
 
+function updateCollisions() {
+    var xPos = player.sprite.x;
+    var yPos = player.sprite.y;
+    if (xPos <= 0) {
+        player.sprite.x = 0;
+    }
+    if (xPos >= WIDTH - player.sprite.width) {
+        player.sprite.x = WIDTH - player.sprite.width;
+    }
+    if (yPos <= upperBound) {
+        player.sprite.y = upperBound;
+    }
+    if (yPos >= lowerBound - player.sprite.height) {
+        player.sprite.y = lowerBound - player.sprite.height;
+    }
+}
 
 function render() {
 
