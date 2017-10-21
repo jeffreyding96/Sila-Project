@@ -1,6 +1,6 @@
-var game = new Phaser.Game("100%", "100%", Phaser.AUTO, 'game', {preload: preload, create: create, update: update, render: render });
+var game = new Phaser.Game("99%", "99%", Phaser.AUTO, 'game', {preload: preload, create: create, update: update, render: render });
 var WIDTH = 2000;
-var HEIGHT = 2000;
+var HEIGHT = 500;
 
 var player;
 var land;
@@ -40,10 +40,17 @@ function preload() {
 }
 
 function create() {
+    land = game.add.tileSprite(0, HEIGHT / 2 - HEIGHT / 3, WIDTH, HEIGHT, 'earth');
+
     game.world.setBounds(0, 0, WIDTH, HEIGHT);
-    land = game.add.tileSprite(0, 0, WIDTH, HEIGHT, 'earth');
+    game.stage.disableVisibilityChange = true;
+    game.canvas.oncontextmenu = function (e) {
+        e.preventDefault();
+    };
 
     player = new Player(game, 50, 50, 0);
+
+    game.camera.follow(player.sprite);
 }
 
 function update() {
