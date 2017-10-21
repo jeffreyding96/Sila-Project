@@ -150,7 +150,7 @@ function preload() {
     game.load.image('hammerhead', 'assets/hammerhead.png');
     game.load.image('killer', 'assets/killerwhale.png');
     game.load.image('mako', 'assets/mako.png');
-    game.load.image('octopus', 'assets/octopus.png');
+    game.load.image('rewards', 'assets/octopus.png');
 }
 
 function create() {
