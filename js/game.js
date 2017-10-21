@@ -42,7 +42,8 @@ var lowerLine;
 var roomLines = [];
 var papers = [];
 var obstacles = [];
-var obstacleTypes = ['crab', 'oil', 'bag', 'spongebob', 'tire', 'trash'];
+var obstacleTypes = ['oil', 'bag', 'tire', 'trash'];
+var evolution = ['animatedFish', 'clownfish', 'crab', 'octopus', 'dolphin', 'greatwhite', 'killerwhale']
 
 var factMenu = {};
 var quizMenu = {};
@@ -51,12 +52,23 @@ var Player = function(game, x, y, rot) {
     this.game = game;
     this.x = x;
     this.y = y;
+    this.evolveNum = 0;
     this.sprite = game.add.sprite(x, y, 'animatedFish');
     this.sprite.width = 100;
     this.sprite.height = 50;
     this.sprite.rotation = rot;
     this.sprite.animations.add('animation', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
     this.sprite.play('animation');
+
+    Player.prototype.evolveFish = function() {
+        this.evolveNum++;
+        var oldX = this.sprite.x;
+        var oldY = this.sprite.y;
+        this.sprite.kill();
+        this.sprite = this.game.add.sprite(oldX, oldY, evolution[this.evolveNum]);
+        this.sprite.width = 100;
+        this.sprite.height = 50;
+    }
 
     Player.prototype.update = function() {
         this.checkMovement();
@@ -130,6 +142,13 @@ function preload() {
     game.load.image('crab', 'assets/Crab.png');
     game.load.image('tire', 'assets/tire.png');
     game.load.image('trash', 'assets/trash.png');
+    game.load.image('clownfish', 'assets/clown fish.png');
+    game.load.image('octopus', 'assets/octopus.png');
+    game.load.image('dolphin', 'assets/dolphin.png');
+    game.load.image('makoshark', 'assets/mako-shark-silo.png');
+    game.load.image('hammerhead', 'assets/hammerhead.png');
+    game.load.image('killerwhale', 'assets/killer whale.png');
+    game.load.image('greatwhite', 'assets/great white.png');
     game.load.spritesheet('start', 'assets/start2.png', 120, 40); 
     game.load.spritesheet('mystery', 'assets/chest.png', 48, 38);
     game.load.image('paper', 'assets/paper.png');
@@ -548,6 +567,9 @@ function goNextRoom() {
     graphics.endFill();
     previousCheckpoint = roomLines[0];
     roomLines.splice(0, 1);
+    player.evolveFish();
+    playerGroup.add(player.sprite);
+    game.camera.follow(player.sprite);
 }
 
 function render() {
