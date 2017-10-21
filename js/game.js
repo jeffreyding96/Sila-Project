@@ -7,6 +7,10 @@ var land;
 
 var upperBound = HEIGHT / 2 - HEIGHT / 3;
 var lowerBound = upperBound + HEIGHT;
+var upperLine;
+var lowerLine;
+
+var graphics;
 
 var Player = function(game, x, y, rot) {
     this.game = game;
@@ -39,20 +43,28 @@ var Player = function(game, x, y, rot) {
 
 function preload() {
     game.load.image('earth', 'assets/light_sand.png');
+    game.load.image('water', 'assets/water.png');
     game.load.image('fish', 'assets/fish.png');
 }
 
 function create() {
-    land = game.add.tileSprite(0, upperBound, WIDTH, HEIGHT, 'earth');
+    land = game.add.tileSprite(0, 0, WIDTH, HEIGHT * 2, 'water');
 
-    game.world.setBounds(0, 0, WIDTH, HEIGHT / 2);
-
+    game.world.setBounds(0, 0, WIDTH, HEIGHT);
     game.stage.disableVisibilityChange = true;
     game.canvas.oncontextmenu = function (e) {
         e.preventDefault();
     };
 
-    player = new Player(game, 50, 50, 0);
+    graphics = game.add.graphics(0, 0);
+    graphics.lineStyle(5, 0xffffff, 1);
+    graphics.moveTo(0, upperBound);
+    graphics.lineTo(WIDTH, upperBound);
+    graphics.moveTo(0, lowerBound);
+    graphics.lineTo(WIDTH, lowerBound);
+    graphics.endFill();
+
+    player = new Player(game, 0, HEIGHT / 2, 0);
 
     game.camera.follow(player.sprite);
 }
@@ -80,5 +92,4 @@ function updateCollisions() {
 }
 
 function render() {
-
 }
