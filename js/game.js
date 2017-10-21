@@ -60,6 +60,7 @@ var quizIndex = 0;
 
 var points = 0;
 var scoreCounter;
+var logo;
 
 var music;
 var sound = {};
@@ -148,6 +149,7 @@ var Obstacle = function(game, x, y, rot) {
 }
 
 function preload() {
+    game.load.image('logo', 'assets/logo1.png');
     game.load.image('white', 'assets/white.png');
     game.load.image('earth', 'assets/light_sand.png');
     game.load.image('waterSprite', 'assets/waterSprite.png');
@@ -217,14 +219,23 @@ function create() {
     sound.bleh = game.add.audio('bleh');
     sound.zing = game.add.audio('zing');
     sound.aww = game.add.audio('aww');
+    sound.aww.volume += 5;
 
     player = new Player(game, 0, HEIGHT / 2, 0);
     playerGroup.add(player.sprite);
     game.camera.follow(player.sprite);
 
+    logo = game.add.sprite(0, 0, 'logo');
+    logo.fixedToCamera = true;
+    logo.cameraOffset.x = 20;
+    logo.cameraOffset.y = 15;
+    logo.width = 100;
+    logo.height = 100;
+    uiGroup.add(logo);
+
     scoreCounter = game.add.bitmapText(0, 0, 'font', '0', 48);
     scoreCounter.fixedToCamera = true;
-    scoreCounter.cameraOffset.x = 25;
+    scoreCounter.cameraOffset.x = game.camera.width / 2 - scoreCounter.width / 2;
     scoreCounter.cameraOffset.y = 20;
     uiGroup.add(scoreCounter);
 
