@@ -44,7 +44,7 @@ var lowerLine;
 var roomLines = [];
 var papers = [];
 var obstacles = [];
-var obstacleTypes = ['crab', 'oil', 'bag', 'spongebob'];
+var obstacleTypes = ['crab', 'oil', 'bag', 'spongebob', 'tire', 'trash'];
 
 var factMenu = {};
 var quizMenu = {};
@@ -130,6 +130,8 @@ function preload() {
     game.load.image('oil', 'assets/oil1.png');
     game.load.image('bag', 'assets/plastic-bags.png');
     game.load.image('crab', 'assets/Crab.png');
+    game.load.image('tire', 'assets/tire.png');
+    game.load.image('trash', 'assets/trash.png');
     game.load.spritesheet('start', 'assets/start2.png', 120, 40); 
     game.load.spritesheet('mystery', 'assets/chest.png', 48, 38);
     game.load.image('paper', 'assets/paper.png');
