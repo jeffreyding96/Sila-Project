@@ -20,6 +20,7 @@ var quizzes = [{question: "What source produces the most oxygen?", answers: ["Fa
 var currAnswer;
 var gotCorrect = false;
 var paperToDestroy;
+var previousCheckpoint = 0;
 
 var startButton;
 var mysteryBox;
@@ -308,7 +309,8 @@ function createFactMenu() {
             goNextRoom();
             return;
         }
-        player.sprite.x = game.camera.x;
+        player.sprite.x = previousCheckpoint;
+        player.sprite.y = HEIGHT / 2;
     }, this);
 
     factMenuGroup.add(factMenu.background);
@@ -544,6 +546,7 @@ function goNextRoom() {
     graphics.moveTo(roomLines[0], upperBound);
     graphics.lineTo(roomLines[0], lowerBound);
     graphics.endFill();
+    previousCheckpoint = roomLines[0];
     roomLines.splice(0, 1);
 }
 
