@@ -212,6 +212,7 @@ function create() {
     };
 
     music = game.add.audio('underwater');
+    music.volume -= 2;
     music.loop = true;
     music.play();
 
