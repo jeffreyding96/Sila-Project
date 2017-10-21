@@ -22,10 +22,10 @@ var HEIGHT = 500;
 // background.animations.play('waves' + n, 8, true);
 // //[>When the start button is clicked the game begins...<]
 
+var facts = ["About 1.3 million gallons of oil are spilled into U.S. waters each year.", "Climate change is largely responsible for the bleaching of coral reefs.", "8 million tons of plastic are dumped in the ocean each year.", "The oceans absorbed 4.8 to 12.7 million metric tons of plastic trash in 2010."]
+
 var startButton;
 var mysteryBox;
-var player;
-var land;
 var graphics;
 var playing = false;
 
@@ -277,8 +277,27 @@ function createFactMenu() {
     factMenu.fact.y = game.camera.height / 2 - factMenu.fact.height / 2;
     factMenu.fact.text = "";
 
+    factMenu.okay = game.add.bitmapText(0, 0, 'font', 'Okay', 32);
+    factMenu.okay.inputEnabled = true;
+    factMenu.okay.align = 'center';
+    factMenu.okay.x = game.camera.width / 2 - factMenu.okay.width / 2; 
+    factMenu.okay.y = factMenu.background.y + factMenu.background.height - 50;
+    factMenu.okay.input.useHandCursor = true;
+    factMenu.okay.events.onInputOver.add(function() {
+        factMenu.okay.tint = 0xff0000;
+    }, this);
+    factMenu.okay.events.onInputOut.add(function() {
+        factMenu.okay.tint = 0xffffff;
+    }, this);
+    factMenu.okay.events.onInputDown.add(function() {
+        playing = true;
+        factMenuGroup.visible = false;
+        player.sprite.x = game.camera.x;
+    }, this);
+
     factMenuGroup.add(factMenu.background);
     factMenuGroup.add(factMenu.fact);
+    factMenuGroup.add(factMenu.okay);
 }
 
 function createQuizMenu() {
@@ -401,8 +420,10 @@ function updateCollisions() {
         player.sprite.y = lowerBound - player.sprite.height;
     }
 
-    handlePapers();
-    handleObstacles();
+    if (playing) {
+        handlePapers();
+        handleObstacles();
+    }
 }
 function handlePapers() {
     for (var i = 0; i < papers.length; i++) {
@@ -414,7 +435,19 @@ function handlePapers() {
 function handleObstacles() {
     for (var i = 0; i < obstacles.length; i++) {
         if (isRectangleCollision(player.sprite.x, player.sprite.y, player.sprite.width, player.sprite.height, obstacles[i].sprite.x, obstacles[i].sprite.y, obstacles[i].sprite.width, obstacles[i].sprite.height)) {
-            console.log("hi");
+            playing = false;
+            factMenuGroup.visible = true;
+            var randFact = facts[getRandIntBetween(0, facts.length)];
+
+            factMenu.background.width = game.camera.width * 0.75;
+            factMenu.background.height = game.camera.height * 0.75;
+            factMenu.background.x = game.camera.x + game.camera.width * 0.125;
+            factMenu.background.y = game.camera.y + game.camera.height * 0.125;
+            factMenu.fact.text = randFact;
+            factMenu.fact.x = game.camera.x + game.camera.width / 2 - factMenu.fact.width / 2;
+            factMenu.fact.y = game.camera.y + game.camera.height / 2 - factMenu.fact.height / 2;
+            factMenu.okay.x = game.camera.x + game.camera.width / 2 - factMenu.okay.width / 2; 
+            factMenu.okay.y = factMenu.background.y + factMenu.background.height - 50;
         }
     }
 }
