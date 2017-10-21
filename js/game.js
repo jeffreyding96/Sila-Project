@@ -126,7 +126,7 @@ function create() {
     game.world.setBounds(0, 0, WIDTH, HEIGHT);
     startButton = game.add.button(750,400, 'start', actionOnClick, this, 1,0,2);
     startButton.anchor.set(0.5,0.5);
-    mysteryBox = game.add.button(1400, 75, 'mystery', boxOpen, this, 1, 0, 1);
+    mysteryBox = game.add.button(1400, 40, 'mystery', boxOpen, this, 1, 0, 1);
     mysteryBox.anchor.set(0.5,0.5);
 
     /*button.OnInputOver.add(over, this);
@@ -225,7 +225,7 @@ function actionOnClick () {
 }
 
 function boxOpen(){
-    playing = true;
+    mysteryBox.destroy();
 }
 function updateCollisions() {
     var xPos = player.sprite.x;
