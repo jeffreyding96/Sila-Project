@@ -209,7 +209,7 @@ function createBorderLines(graphics) {
 }
 
 function createRoomLines(graphics) {
-    var i = 0;
+    var i = roomWidth;
     while (i < WIDTH) {
         graphics.moveTo(i, upperBound);
         graphics.lineTo(i, lowerBound);
@@ -270,6 +270,12 @@ function createFactMenu() {
     factMenu.background.y = game.camera.height * 0.125;
     factMenu.background.tint = "#000000";
 
+    factMenu.title = game.add.bitmapText(0, 0, 'font', 'Uh oh! You hit something bad!\nDid you know:');
+    factMenu.title.maxWidth = factMenu.background.width * 0.8;
+    factMenu.title.align = 'center';
+    factMenu.title.x = game.camera.width / 2 - factMenu.title.width / 2;
+    factMenu.title.y = factMenu.background.y + 50;
+
     factMenu.fact = game.add.bitmapText(0, 0, 'font', '1', 32);
     factMenu.fact.maxWidth = factMenu.background.width * 0.8;
     factMenu.fact.align = 'center';
@@ -293,9 +299,16 @@ function createFactMenu() {
         playing = true;
         factMenuGroup.visible = false;
         player.sprite.x = game.camera.x;
+        for (var i = 0; i < obstacles.length; i++) {
+            obstacles[i].sprite.x = obstacles[i].x;
+            obstacles[i].sprite.y = obstacles[i].y;
+            obstacles[i].changeDirectionTime = game.time.now;
+            obstacles[i].moveUp = true;
+        }
     }, this);
 
     factMenuGroup.add(factMenu.background);
+    factMenuGroup.add(factMenu.title);
     factMenuGroup.add(factMenu.fact);
     factMenuGroup.add(factMenu.okay);
 }
@@ -428,7 +441,6 @@ function updateCollisions() {
 function handlePapers() {
     for (var i = 0; i < papers.length; i++) {
         if (isRectangleCollision(player.sprite.x, player.sprite.y, player.sprite.width, player.sprite.height, papers[i].x, papers[i].y, papers[i].width, papers[i].height)) {
-            console.log("hi");
         }
     }
 }
@@ -443,6 +455,8 @@ function handleObstacles() {
             factMenu.background.height = game.camera.height * 0.75;
             factMenu.background.x = game.camera.x + game.camera.width * 0.125;
             factMenu.background.y = game.camera.y + game.camera.height * 0.125;
+            factMenu.title.x = game.camera.x + game.camera.width / 2 - factMenu.title.width / 2;
+            factMenu.title.y = factMenu.background.y + 50;
             factMenu.fact.text = randFact;
             factMenu.fact.x = game.camera.x + game.camera.width / 2 - factMenu.fact.width / 2;
             factMenu.fact.y = game.camera.y + game.camera.height / 2 - factMenu.fact.height / 2;
