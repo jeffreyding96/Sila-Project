@@ -1,16 +1,25 @@
 var game = new Phaser.Game("99%", "99%", Phaser.AUTO, 'game', {preload: preload, create: create, update: update, render: render });
-var WIDTH = 2000;
+
+var roomWidth = 1000;
+
+var WIDTH = 7 * roomWidth;
 var HEIGHT = 500;
 
 var player;
 var land;
+var graphics;
+
+var playerGroup;
+var obstacleGroup;
+var itemGroup;
 
 var upperBound = HEIGHT / 2 - HEIGHT / 3;
 var lowerBound = upperBound + HEIGHT;
 var upperLine;
 var lowerLine;
 
-var graphics;
+var roomLines = [];
+var papers = [];
 
 var Player = function(game, x, y, rot) {
     this.game = game;
@@ -45,6 +54,7 @@ function preload() {
     game.load.image('earth', 'assets/light_sand.png');
     game.load.image('water', 'assets/water.png');
     game.load.image('fish', 'assets/fish.png');
+    game.load.image('paper', 'assets/paper.png');
 }
 
 function create() {
@@ -56,17 +66,62 @@ function create() {
         e.preventDefault();
     };
 
+    createLayers();
+
+    player = new Player(game, 0, HEIGHT / 2, 0);
+    game.camera.follow(player.sprite);
+
+    playerGroup.add(player.sprite);
+
     graphics = game.add.graphics(0, 0);
     graphics.lineStyle(5, 0xffffff, 1);
+    obstacleGroup.add(graphics);
+
+    createBorderLines(graphics);
+    createRoomLines(graphics);
+    createPapers();
+}
+
+function createLayers() {
+    obstacleGroup = game.add.group();
+    itemGroup = game.add.group();
+    playerGroup = game.add.group();
+
+    game.world.bringToTop(obstacleGroup);
+    game.world.bringToTop(itemGroup);
+    game.world.bringToTop(playerGroup);
+}
+
+function createBorderLines(graphics) {
     graphics.moveTo(0, upperBound);
     graphics.lineTo(WIDTH, upperBound);
     graphics.moveTo(0, lowerBound);
     graphics.lineTo(WIDTH, lowerBound);
     graphics.endFill();
+}
 
-    player = new Player(game, 0, HEIGHT / 2, 0);
+function createRoomLines(graphics) {
+    var i = 0;
+    while (i < WIDTH) {
+        graphics.moveTo(i, upperBound);
+        graphics.lineTo(i, lowerBound);
 
-    game.camera.follow(player.sprite);
+        i += roomWidth;
+    }
+    graphics.endFill();
+}
+
+function createPapers() {
+    var i = roomWidth;
+    while (i < WIDTH) {
+        var paperSprite = game.add.sprite(i - 100, (lowerBound - upperBound) / 2, 'paper');
+        paperSprite.width = 50;
+        paperSprite.height = 50;
+        papers.push(paperSprite);
+        itemGroup.add(paperSprite);
+
+        i += roomWidth;
+    }
 }
 
 function update() {
