@@ -142,6 +142,15 @@ function preload() {
     game.load.image('rewards', 'assets/rewards.png');
     game.load.spritesheet('confirm','assets/confirm.png',109,29);
     game.load.bitmapFont('font', 'assets/font.png', 'assets/font.fnt');
+    game.load.image('beluga', 'assets/belugacorrected.png');
+    game.load.image('blacktip', 'assets/blacktiptip-shark');
+    game.load.image('clown', 'assets/clownfish.png');
+    game.load.image('dolphin', 'assets/dolphin.png');
+    game.load.image('greatwhite','assets/greatwhite');
+    game.load.image('hammerhead', 'assets/hammerhead.png');
+    game.load.image('killer', 'assets/killerwhale.png');
+    game.load.image('mako', 'assets/mako.png');
+    game.load.image('octopus', 'assets/octopus.png');
 }
 
 function create() {
