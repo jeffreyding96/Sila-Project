@@ -240,7 +240,8 @@ function createRoomLines(graphics) {
 function createPapers() {
     var i = roomWidth;
     while (i < WIDTH) {
-        var paperSprite = game.add.sprite(i - 100, (lowerBound - upperBound) / 2, 'paper');
+        var yVal = getRandBetween(upperBound + 100, lowerBound - 200);
+        var paperSprite = game.add.sprite(i - 100, yVal, 'paper');
         paperSprite.width = 50;
         paperSprite.height = 50;
         papers.push(paperSprite);
@@ -248,6 +249,12 @@ function createPapers() {
 
         i += roomWidth;
     }
+    var paperSprite = game.add.sprite(i - 100, (lowerBound - upperBound) / 2, 'paper');
+    paperSprite.y = (lowerBound - upperBound) / 2 + paperSprite.height / 2;
+    paperSprite.width = 50;
+    paperSprite.height = 50;
+    papers.push(paperSprite);
+    itemGroup.add(paperSprite);
 }
 
 function createObstacles() {
@@ -524,6 +531,15 @@ function handlePapers() {
             quizMenu.answer3.y = quizMenu.background.y + quizMenu.background.height - 20 - 2 * (quizMenu.answer3.height + 40); 
             quizMenu.answer4.x = game.camera.x + game.camera.width / 2 - quizMenu.answer4.width / 2;
             quizMenu.answer4.y = quizMenu.background.y + quizMenu.background.height - 20 - 1 * (quizMenu.answer4.height + 40); 
+
+            if (papers.length == 1) {
+                quizMenu.question.text = "You made it! You are the king of the ocean.\nHelp your other fish grow by eliminating waste and recycling!";
+                quizMenu.question.y = quizMenu.background.y + quizMenu.background.height / 2 - quizMenu.question.height / 2;
+                quizMenu.answer1.text = "";
+                quizMenu.answer2.text = "";
+                quizMenu.answer3.text = "";
+                quizMenu.answer4.text = "";
+            }
 
             playing = false;
             quizMenuGroup.visible = true;
