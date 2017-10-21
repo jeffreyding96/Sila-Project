@@ -23,9 +23,13 @@ var HEIGHT = 500;
 // //[>When the start button is clicked the game begins...<]
 
 
+
+var startButton;
+var mysteryBox;
 var player;
 var land;
 var graphics;
+var playing = false;
 
 var playerGroup;
 var obstacleGroup;
@@ -55,19 +59,21 @@ var Player = function(game, x, y, rot) {
 
     Player.prototype.checkMovement = function() {
         var movement = 4;
-        if (game.input.keyboard.isDown(Phaser.Keyboard.A)) {
-            this.sprite.x -= movement;
+        if(playing == true){
+            if (game.input.keyboard.isDown(Phaser.Keyboard.A)) {
+                this.sprite.x -= movement;
+            }
+            if (game.input.keyboard.isDown(Phaser.Keyboard.W)) {
+                this.sprite.y -= movement;
+            }
+            if (game.input.keyboard.isDown(Phaser.Keyboard.S)) {
+                this.sprite.y += movement;
+            }
+            if (game.input.keyboard.isDown(Phaser.Keyboard.D)) {
+                this.sprite.x += movement;
+            }
         }
-        if (game.input.keyboard.isDown(Phaser.Keyboard.W)) {
-            this.sprite.y -= movement;
-        }
-        if (game.input.keyboard.isDown(Phaser.Keyboard.S)) {
-            this.sprite.y += movement;
-        }
-        if (game.input.keyboard.isDown(Phaser.Keyboard.D)) {
-            this.sprite.x += movement;
-        }
-    }
+   } 
 }
 
 var Obstacle = function(game, x, y, rot, changeTime, speed) {
@@ -107,6 +113,9 @@ function preload() {
     game.load.image('earth', 'assets/light_sand.png');
     game.load.image('waterSprite', 'assets/waterSprite.png');
     game.load.image('fish', 'assets/fish.png');
+
+    game.load.spritesheet('start', 'assets/start2.png',120,40); 
+    game.load.spritesheet('mystery', 'assets/chest.png',48,38);
     game.load.image('paper', 'assets/paper.png');
     game.load.image('spongebob', 'assets/spongebob.png');
     game.load.spritesheet('water', 'assets/water.png', 32, 400, 32)
@@ -114,8 +123,15 @@ function preload() {
 
 function create() {
     land = game.add.tileSprite(0, 0, WIDTH, HEIGHT * 2, 'waterSprite');
-
     game.world.setBounds(0, 0, WIDTH, HEIGHT);
+    startButton = game.add.button(750,400, 'start', actionOnClick, this, 1,0,2);
+    startButton.anchor.set(0.5,0.5);
+    mysteryBox = game.add.button(1400, 75, 'mystery', boxOpen, this, 1, 0, 1);
+    mysteryBox.anchor.set(0.5,0.5);
+
+    /*button.OnInputOver.add(over, this);
+    button.OnInputOver.add(out,this);
+    button.OnInputOver.add(up,this);*/
     game.stage.disableVisibilityChange = true;
     game.canvas.oncontextmenu = function (e) {
         e.preventDefault();
@@ -202,6 +218,15 @@ function update() {
     }
 }
 
+function actionOnClick () {
+    startButton.destroy();
+    mysteryBox.destroy();
+    playing = true;
+}
+
+function boxOpen(){
+    playing = true;
+}
 function updateCollisions() {
     var xPos = player.sprite.x;
     var yPos = player.sprite.y;
