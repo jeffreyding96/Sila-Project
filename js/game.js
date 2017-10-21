@@ -5,28 +5,22 @@ var roomWidth = 1000;
 var WIDTH = 7 * roomWidth;
 var HEIGHT = 500;
 
+// var background;
 
-function homeload() {
-    game.load.spritesheet('water', 'assets/water.png', 32, 400, 32)
-}
+// background = game.add.tileSprite(0, 24*16, 128*16, 24*16, 'waters');
 
-var background
+// background.animations.add('waves0', [0, 1, 2, 3, 2, 1]);
+// background.animations.add('waves1', [4, 5, 6, 7, 6, 5]);
+// background.animations.add('waves2', [8, 9, 10, 11, 10, 9]);
+// background.animations.add('waves3', [12, 13, 14, 15, 14, 13]);
+// background.animations.add('waves4', [16, 17, 18, 19, 18, 17]);
+// background.animations.add('waves5', [20, 21, 22, 23, 22, 21]);
+// background.animations.add('waves6', [24, 25, 26, 27, 26, 25]);
+// background.animations.add('waves7', [28, 29, 30, 31, 30, 29]);
 
-background = game.add.tileSprite(0, 24*16, 128*16, 24*16, 'waters')
-
-background.animations.add('waves0', [0, 1, 2, 3, 2, 1]);
-    background.animations.add('waves1', [4, 5, 6, 7, 6, 5]);
-    background.animations.add('waves2', [8, 9, 10, 11, 10, 9]);
-    background.animations.add('waves3', [12, 13, 14, 15, 14, 13]);
-    background.animations.add('waves4', [16, 17, 18, 19, 18, 17]);
-    background.animations.add('waves5', [20, 21, 22, 23, 22, 21]);
-    background.animations.add('waves6', [24, 25, 26, 27, 26, 25]);
-    background.animations.add('waves7', [28, 29, 30, 31, 30, 29]);
-
-var n = 7;
-background.animations.play('waves' + n, 8, true);
-}
-/*When the start button is clicked the game begins...*/
+// var n = 7;
+// background.animations.play('waves' + n, 8, true);
+// //[>When the start button is clicked the game begins...<]
 
 
 var player;
@@ -44,6 +38,7 @@ var lowerLine;
 
 var roomLines = [];
 var papers = [];
+var obstacles = [];
 
 var Player = function(game, x, y, rot) {
     this.game = game;
@@ -52,6 +47,7 @@ var Player = function(game, x, y, rot) {
     this.sprite = game.add.sprite(x, y, 'fish');
     this.sprite.width = 50;
     this.sprite.height = 50;
+    this.sprite.rotation = rot;
 
     Player.prototype.update = function() {
         this.checkMovement();
@@ -74,15 +70,50 @@ var Player = function(game, x, y, rot) {
     }
 }
 
+var Obstacle = function(game, x, y, rot, changeTime, speed) {
+    this.game = game;
+    this.x = x;
+    this.y = y;
+    this.speed = speed;
+    this.sprite = game.add.sprite(x, y, 'spongebob');
+    this.sprite.width = 100;
+    this.sprite.height = 150;
+    this.sprite.rotation = rot;
+    this.changeDirectionTime = game.time.now;
+    this.changeDirectionDelay = changeTime;
+    this.moveUp = true;
+
+    Obstacle.prototype.update = function() {
+        this.move();
+    }
+
+    Obstacle.prototype.move = function() {
+        if (game.time.now > this.changeDirectionTime + this.changeDirectionDelay) {
+            this.moveUp = !this.moveUp;
+            this.changeDirectionTime = game.time.now;
+        }
+        var movement = this.speed;
+
+        if (this.moveUp) {
+            this.sprite.y += movement;
+        }
+        else {
+            this.sprite.y -= movement;
+        }
+    }
+}
+
 function preload() {
     game.load.image('earth', 'assets/light_sand.png');
-    game.load.image('water', 'assets/water.png');
+    game.load.image('waterSprite', 'assets/waterSprite.png');
     game.load.image('fish', 'assets/fish.png');
     game.load.image('paper', 'assets/paper.png');
+    game.load.image('spongebob', 'assets/spongebob.png');
+    game.load.spritesheet('water', 'assets/water.png', 32, 400, 32)
 }
 
 function create() {
-    land = game.add.tileSprite(0, 0, WIDTH, HEIGHT * 2, 'water');
+    land = game.add.tileSprite(0, 0, WIDTH, HEIGHT * 2, 'waterSprite');
 
     game.world.setBounds(0, 0, WIDTH, HEIGHT);
     game.stage.disableVisibilityChange = true;
@@ -93,9 +124,8 @@ function create() {
     createLayers();
 
     player = new Player(game, 0, HEIGHT / 2, 0);
-    game.camera.follow(player.sprite);
-
     playerGroup.add(player.sprite);
+    game.camera.follow(player.sprite);
 
     graphics = game.add.graphics(0, 0);
     graphics.lineStyle(5, 0xffffff, 1);
@@ -104,6 +134,7 @@ function create() {
     createBorderLines(graphics);
     createRoomLines(graphics);
     createPapers();
+    createObstacles();
 }
 
 function createLayers() {
@@ -148,9 +179,27 @@ function createPapers() {
     }
 }
 
+function createObstacles() {
+    var count = 150;
+    while (count < WIDTH) {
+        for (var i = 0; i < 4; i++) {
+            var randX = getRandBetween(count, count + roomWidth - 150);
+            var randY = getRandBetween(upperBound - 100, lowerBound - 200);
+            var obs = new Obstacle(game, randX, randY, 0, getRandBetween(500, 2000), getRandBetween(2, 5));
+            obstacles.push(obs);
+            obstacleGroup.add(obs.sprite);
+        }
+        count += roomWidth;
+    }
+}
+
 function update() {
     player.update();
     updateCollisions();
+
+    for (var i = 0; i < obstacles.length; i++) {
+        obstacles[i].update();
+    }
 }
 
 function updateCollisions() {
@@ -171,4 +220,8 @@ function updateCollisions() {
 }
 
 function render() {
+}
+
+function getRandBetween(x, y) {
+    return Math.random() * (y - x) + x;
 }
