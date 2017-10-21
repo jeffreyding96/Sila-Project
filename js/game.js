@@ -33,6 +33,8 @@ var playerGroup;
 var obstacleGroup;
 var itemGroup;
 var uiGroup;
+var factMenuGroup;
+var quizMenuGroup;
 
 var upperBound = HEIGHT / 2 - HEIGHT / 3;
 var lowerBound = upperBound + HEIGHT;
@@ -43,6 +45,9 @@ var roomLines = [];
 var papers = [];
 var obstacles = [];
 var obstacleTypes = ['crab', 'oil', 'bag', 'spongebob'];
+
+var factMenu = {};
+var quizMenu = {};
 
 var Player = function(game, x, y, rot) {
     this.game = game;
@@ -90,13 +95,17 @@ var Obstacle = function(game, x, y, rot) {
     this.sprite.rotation = rot;
     this.changeDirectionTime = game.time.now;
     this.changeDirectionDelay = getRandBetween(1000, 2000);
-    this.moveUp = true;
+    this.moveUp = false;
 
     Obstacle.prototype.update = function() {
         this.move();
     }
 
     Obstacle.prototype.move = function() {
+        if (!playing) {
+            return;
+        }
+
         if (game.time.now > this.changeDirectionTime + this.changeDirectionDelay) {
             this.moveUp = !this.moveUp;
             this.changeDirectionTime = game.time.now;
@@ -113,6 +122,7 @@ var Obstacle = function(game, x, y, rot) {
 }
 
 function preload() {
+    game.load.image('white', 'assets/white.png');
     game.load.image('earth', 'assets/light_sand.png');
     game.load.image('waterSprite', 'assets/waterSprite.png');
     game.load.image('fish', 'assets/fish.png');
@@ -125,6 +135,7 @@ function preload() {
     game.load.image('paper', 'assets/paper.png');
     game.load.image('spongebob', 'assets/spongebob.png');
     game.load.spritesheet('water', 'assets/water.png', 32, 400, 32)
+    game.load.bitmapFont('font', 'assets/font.png', 'assets/font.fnt');
 }
 
 function create() {
@@ -151,10 +162,12 @@ function create() {
     createRoomLines(graphics);
     createPapers();
     createObstacles();
+    createFactMenu();
+    createQuizMenu();
 }
 
 function createButtons() {
-    startButton = game.add.button(750, 400, 'start', actionOnClick, this, 1,0,2);
+    startButton = game.add.button(750, 400, 'start', actionOnClick, this, 1, 0, 2);
     startButton.x = game.camera.width / 2;
     startButton.y = game.camera.height / 2 - startButton.height / 2;
 
@@ -171,11 +184,18 @@ function createLayers() {
     itemGroup = game.add.group();
     playerGroup = game.add.group();
     uiGroup = game.add.group();
+    factMenuGroup = game.add.group();
+    quizMenuGroup = game.add.group();
 
     game.world.bringToTop(obstacleGroup);
     game.world.bringToTop(itemGroup);
     game.world.bringToTop(playerGroup);
     game.world.bringToTop(uiGroup);
+    game.world.bringToTop(factMenuGroup);
+    game.world.bringToTop(quizMenuGroup);
+
+    factMenuGroup.visible = false;
+    quizMenuGroup.visible = false;
 }
 
 function createBorderLines(graphics) {
@@ -216,10 +236,13 @@ function createObstacles() {
         for (var i = 0; i < 4; i++) {
             var randX;
             while (true) {
-                randX = getRandBetween(count, count + roomWidth - 300);
+                randX = getRandIntBetween(count, count + roomWidth - 300);
                 var tooClose = false;
-                for (var i = 0; i < obstacles.length; i++) {
-                    if (Math.abs(obstacles[i].x - randX) < 125) {
+                if (obstacles.length == 0) {
+                    break;
+                }
+                for (var j = 0; j < obstacles.length; j++) {
+                    if (Math.abs(obstacles[j].x - randX) < 100) {
                         tooClose = true;
                     }
                 }
@@ -235,6 +258,111 @@ function createObstacles() {
         }
         count += roomWidth;
     }
+}
+
+function createFactMenu() {
+    factMenu.background = game.add.sprite(0, 0, 'white');
+    factMenu.background.width = game.camera.width * 0.75;
+    factMenu.background.height = game.camera.height * 0.75;
+    factMenu.background.x = game.camera.width * 0.125;
+    factMenu.background.y = game.camera.height * 0.125;
+    factMenu.background.tint = "#000000";
+
+    factMenu.fact = game.add.bitmapText(0, 0, 'font', '1', 32);
+    factMenu.fact.maxWidth = factMenu.background.width * 0.8;
+    factMenu.fact.align = 'center';
+    factMenu.fact.x = game.camera.width / 2 - factMenu.fact.width / 2;
+    factMenu.fact.y = game.camera.height / 2 - factMenu.fact.height / 2;
+    factMenu.fact.text = "";
+
+    factMenuGroup.add(factMenu.background);
+    factMenuGroup.add(factMenu.fact);
+}
+
+function createQuizMenu() {
+    quizMenu.background = game.add.sprite(0, 0, 'white');
+    quizMenu.background.width = game.camera.width * 0.75;
+    quizMenu.background.height = game.camera.height * 0.75;
+    quizMenu.background.x = game.camera.width * 0.125;
+    quizMenu.background.y = game.camera.height * 0.125;
+    quizMenu.background.tint = "#000000";
+
+    quizMenu.question = game.add.bitmapText(0, 0, 'font', '1', 32);
+    quizMenu.question.maxWidth = quizMenu.background.width * 0.8;
+    quizMenu.question.align = 'center';
+    quizMenu.question.x = game.camera.width / 2 - quizMenu.question.width / 2;
+    quizMenu.question.y = quizMenu.background.y + 50;
+
+    quizMenu.answer1 = game.add.bitmapText(0, 0, 'font', '111111', 24);
+    quizMenu.answer1.inputEnabled = true;
+    quizMenu.answer1.maxWidth = quizMenu.background.width * 0.8;
+    quizMenu.answer1.align = 'center';
+    quizMenu.answer1.x = game.camera.width / 2 - quizMenu.answer1.width / 2;
+    quizMenu.answer1.y = quizMenu.background.y + quizMenu.background.height - 20 - 4 * (quizMenu.answer1.height + 40); 
+    quizMenu.answer1.input.useHandCursor = true;
+    quizMenu.answer1.events.onInputOver.add(function() {
+        quizMenu.answer1.tint = 0xff0000;
+    }, this);
+    quizMenu.answer1.events.onInputOut.add(function() {
+        quizMenu.answer1.tint = 0xffffff;
+    }, this);
+    quizMenu.answer1.events.onInputDown.add(function() {
+    }, this);
+
+    quizMenu.answer2 = game.add.bitmapText(0, 0, 'font', '111111', 24);
+    quizMenu.answer2.inputEnabled = true;
+    quizMenu.answer2.maxWidth = quizMenu.background.width * 0.8;
+    quizMenu.answer2.align = 'center';
+    quizMenu.answer2.x = game.camera.width / 2 - quizMenu.answer2.width / 2;
+    quizMenu.answer2.y = quizMenu.background.y + quizMenu.background.height - 20 - 3 * (quizMenu.answer2.height + 40); 
+    quizMenu.answer2.input.useHandCursor = true;
+    quizMenu.answer2.events.onInputOver.add(function() {
+        quizMenu.answer2.tint = 0xff0000;
+    }, this);
+    quizMenu.answer2.events.onInputOut.add(function() {
+        quizMenu.answer2.tint = 0xffffff;
+    }, this);
+    quizMenu.answer2.events.onInputDown.add(function() {
+    }, this);
+
+    quizMenu.answer3 = game.add.bitmapText(0, 0, 'font', '111111', 24);
+    quizMenu.answer3.inputEnabled = true;
+    quizMenu.answer3.maxWidth = quizMenu.background.width * 0.8;
+    quizMenu.answer3.align = 'center';
+    quizMenu.answer3.x = game.camera.width / 2 - quizMenu.answer3.width / 2;
+    quizMenu.answer3.y = quizMenu.background.y + quizMenu.background.height - 20 - 2 * (quizMenu.answer3.height + 40); 
+    quizMenu.answer3.input.useHandCursor = true;
+    quizMenu.answer3.events.onInputOver.add(function() {
+        quizMenu.answer3.tint = 0xff0000;
+    }, this);
+    quizMenu.answer3.events.onInputOut.add(function() {
+        quizMenu.answer3.tint = 0xffffff;
+    }, this);
+    quizMenu.answer3.events.onInputDown.add(function() {
+    }, this);
+
+    quizMenu.answer4 = game.add.bitmapText(0, 0, 'font', '111111', 24);
+    quizMenu.answer4.inputEnabled = true;
+    quizMenu.answer4.maxWidth = quizMenu.background.width * 0.8;
+    quizMenu.answer4.align = 'center';
+    quizMenu.answer4.x = game.camera.width / 2 - quizMenu.answer4.width / 2;
+    quizMenu.answer4.y = quizMenu.background.y + quizMenu.background.height - 20 - 1 * (quizMenu.answer4.height + 40); 
+    quizMenu.answer4.input.useHandCursor = true;
+    quizMenu.answer4.events.onInputOver.add(function() {
+        quizMenu.answer4.tint = 0xff0000;
+    }, this);
+    quizMenu.answer4.events.onInputOut.add(function() {
+        quizMenu.answer4.tint = 0xffffff;
+    }, this);
+    quizMenu.answer4.events.onInputDown.add(function() {
+    }, this);
+
+    quizMenuGroup.add(quizMenu.background);
+    quizMenuGroup.add(quizMenu.question);
+    quizMenuGroup.add(quizMenu.answer1);
+    quizMenuGroup.add(quizMenu.answer2);
+    quizMenuGroup.add(quizMenu.answer3);
+    quizMenuGroup.add(quizMenu.answer4);
 }
 
 function update() {
