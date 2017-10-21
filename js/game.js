@@ -22,8 +22,6 @@ var HEIGHT = 500;
 // background.animations.play('waves' + n, 8, true);
 // //[>When the start button is clicked the game begins...<]
 
-
-
 var startButton;
 var mysteryBox;
 var player;
@@ -34,6 +32,7 @@ var playing = false;
 var playerGroup;
 var obstacleGroup;
 var itemGroup;
+var uiGroup;
 
 var upperBound = HEIGHT / 2 - HEIGHT / 3;
 var lowerBound = upperBound + HEIGHT;
@@ -114,8 +113,8 @@ function preload() {
     game.load.image('waterSprite', 'assets/waterSprite.png');
     game.load.image('fish', 'assets/fish.png');
 
-    game.load.spritesheet('start', 'assets/start2.png',120,40); 
-    game.load.spritesheet('mystery', 'assets/chest.png',48,38);
+    game.load.spritesheet('start', 'assets/start2.png', 120, 40); 
+    game.load.spritesheet('mystery', 'assets/chest.png', 48, 38);
     game.load.image('paper', 'assets/paper.png');
     game.load.image('spongebob', 'assets/spongebob.png');
     game.load.spritesheet('water', 'assets/water.png', 32, 400, 32)
@@ -124,20 +123,13 @@ function preload() {
 function create() {
     land = game.add.tileSprite(0, 0, WIDTH, HEIGHT * 2, 'waterSprite');
     game.world.setBounds(0, 0, WIDTH, HEIGHT);
-    startButton = game.add.button(750,400, 'start', actionOnClick, this, 1,0,2);
-    startButton.anchor.set(0.5,0.5);
-    mysteryBox = game.add.button(1400, 75, 'mystery', boxOpen, this, 1, 0, 1);
-    mysteryBox.anchor.set(0.5,0.5);
 
-    /*button.OnInputOver.add(over, this);
-    button.OnInputOver.add(out,this);
-    button.OnInputOver.add(up,this);*/
+    createLayers();
+
     game.stage.disableVisibilityChange = true;
     game.canvas.oncontextmenu = function (e) {
         e.preventDefault();
     };
-
-    createLayers();
 
     player = new Player(game, 0, HEIGHT / 2, 0);
     playerGroup.add(player.sprite);
@@ -147,20 +139,36 @@ function create() {
     graphics.lineStyle(5, 0xffffff, 1);
     obstacleGroup.add(graphics);
 
+    createButtons();
     createBorderLines(graphics);
     createRoomLines(graphics);
     createPapers();
     createObstacles();
 }
 
+function createButtons() {
+    startButton = game.add.button(750, 400, 'start', actionOnClick, this, 1,0,2);
+    startButton.x = game.camera.width / 2;
+    startButton.y = game.camera.height / 2 - startButton.height / 2;
+
+    startButton.anchor.set(0.5,0.5);
+    mysteryBox = game.add.button(game.camera.width - 50, 50, 'mystery', boxOpen, this, 1, 0, 1);
+    mysteryBox.anchor.set(0.5,0.5);
+
+    uiGroup.add(startButton);
+    uiGroup.add(mysteryBox);
+}
+
 function createLayers() {
     obstacleGroup = game.add.group();
     itemGroup = game.add.group();
     playerGroup = game.add.group();
+    uiGroup = game.add.group();
 
     game.world.bringToTop(obstacleGroup);
     game.world.bringToTop(itemGroup);
     game.world.bringToTop(playerGroup);
+    game.world.bringToTop(uiGroup);
 }
 
 function createBorderLines(graphics) {
