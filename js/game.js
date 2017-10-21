@@ -89,7 +89,7 @@ var Obstacle = function(game, x, y, rot) {
     this.sprite.height = 150;
     this.sprite.rotation = rot;
     this.changeDirectionTime = game.time.now;
-    this.changeDirectionDelay = getRandBetween(100, 2000);
+    this.changeDirectionDelay = getRandBetween(1000, 2000);
     this.moveUp = true;
 
     Obstacle.prototype.update = function() {
@@ -214,18 +214,18 @@ function createObstacles() {
     var count = 100;
     while (count < WIDTH) {
         for (var i = 0; i < 4; i++) {
-            var randX = getRandBetween(count, count + roomWidth - 300);
+            var randX;
             while (true) {
+                randX = getRandBetween(count, count + roomWidth - 300);
                 var tooClose = false;
                 for (var i = 0; i < obstacles.length; i++) {
-                    if (Math.abs(obstacles[i].x - randX) < 75) {
+                    if (Math.abs(obstacles[i].x - randX) < 125) {
                         tooClose = true;
                     }
                 }
                 if (!tooClose) {
                     break;
                 }
-                randX = getRandBetween(count, count + roomWidth - 150);
             }
             var midPoint = (lowerBound - upperBound) / 2;
             var randY = getRandBetween(upperBound - 100, lowerBound - 200);
@@ -270,6 +270,23 @@ function updateCollisions() {
     if (yPos >= lowerBound - player.sprite.height) {
         player.sprite.y = lowerBound - player.sprite.height;
     }
+
+    handlePapers();
+    handleObstacles();
+}
+function handlePapers() {
+    for (var i = 0; i < papers.length; i++) {
+        if (isRectangleCollision(player.sprite.x, player.sprite.y, player.sprite.width, player.sprite.height, papers[i].x, papers[i].y, papers[i].width, papers[i].height)) {
+            console.log("hi");
+        }
+    }
+}
+function handleObstacles() {
+    for (var i = 0; i < obstacles.length; i++) {
+        if (isRectangleCollision(player.sprite.x, player.sprite.y, player.sprite.width, player.sprite.height, obstacles[i].sprite.x, obstacles[i].sprite.y, obstacles[i].sprite.width, obstacles[i].sprite.height)) {
+            console.log("hi");
+        }
+    }
 }
 
 function render() {
@@ -280,4 +297,12 @@ function getRandBetween(x, y) {
 }
 function getRandIntBetween(x, y) {
     return Math.floor(getRandBetween(x, y));
+}
+function isRectangleCollision(x1, y1, w1, h1, x2, y2, w2, h2) {
+    if (x1 < x2 + w1 && x1 + w1 > x2 &&
+        y1 < y2 + h2 && h1 + y1 > y2) {
+        return true;
+    }
+    return false;
+    // return (Math.abs(x1 - x2) * 2 < (w1 + w2)) && (Math.abs(y1 - y2) * 2 < (h1 + h2));
 }
