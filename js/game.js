@@ -61,6 +61,7 @@ var quizIndex = 0;
 var points = 0;
 var scoreCounter;
 var logo;
+var oceancommotion;
 
 var music;
 var sound = {};
@@ -150,6 +151,7 @@ var Obstacle = function(game, x, y, rot) {
 
 function preload() {
     game.load.image('logo', 'assets/logo1.png');
+    game.load.image('oceancommotion', 'assets/Ocean Commotion Logo.png');
     game.load.image('white', 'assets/white.png');
     game.load.image('earth', 'assets/light_sand.png');
     game.load.image('waterSprite', 'assets/waterSprite.png');
@@ -232,6 +234,14 @@ function create() {
     logo.width = 100;
     logo.height = 100;
     uiGroup.add(logo);
+
+    oceancommotion = game.add.sprite(0, 0, 'oceancommotion');
+    oceancommotion.fixedToCamera = true;
+    oceancommotion.width = 500;
+    oceancommotion.height = 300;
+    oceancommotion.cameraOffset.x = 0;
+    oceancommotion.cameraOffset.y = game.camera.height - oceancommotion.height / 2;
+    uiGroup.add(oceancommotion);
 
     scoreCounter = game.add.bitmapText(0, 0, 'font', '0', 48);
     scoreCounter.fixedToCamera = true;
