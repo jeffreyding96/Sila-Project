@@ -5,29 +5,31 @@ var roomWidth = 1000;
 var WIDTH = 7 * roomWidth;
 var HEIGHT = 500;
 
-// var background;
+var facts = ["About 1.3 million gallons of oil are spilled into U.S. waters each year.",
+    "Climate change is largely responsible for the bleaching of coral reefs.",
+    "8 million tons of plastic are dumped in the ocean each year.", 
+    "The oceans absorbed 4.8 to 12.7 million metric tons of plastic trash in 2010.", 
+    "We have only explored about 5% of earth's oceans.", 
+    "The ocean produces more oxygen than all the rain forests combined."];
 
-// background = game.add.tileSprite(0, 24*16, 128*16, 24*16, 'waters');
+var quizzes = [{question: "What source produces the most oxygen?", answers: ["Factories", "The Ocean", "Rain Forests"], answer: 2},
+    {question: "How much plastic is dumped in the ocean each year?", answers: ["4 million tons", "6 million tons", "8 million tons"], answer: 3},
+    {question: "What object/animal is responsible for the most deaths each year?", answers: ["Sharks", "Mangoes", "Coconuts"], answer: 3},
+    {question: "What type of shark can survive in both fresh water and salt water?", answers: ["The Bull Shark", "The Tiger Shark", "The Nurse Shark"], answer: 1}];
 
-// background.animations.add('waves0', [0, 1, 2, 3, 2, 1]);
-// background.animations.add('waves1', [4, 5, 6, 7, 6, 5]);
-// background.animations.add('waves2', [8, 9, 10, 11, 10, 9]);
-// background.animations.add('waves3', [12, 13, 14, 15, 14, 13]);
-// background.animations.add('waves4', [16, 17, 18, 19, 18, 17]);
-// background.animations.add('waves5', [20, 21, 22, 23, 22, 21]);
-// background.animations.add('waves6', [24, 25, 26, 27, 26, 25]);
-// background.animations.add('waves7', [28, 29, 30, 31, 30, 29]);
-
-// var n = 7;
-// background.animations.play('waves' + n, 8, true);
-// //[>When the start button is clicked the game begins...<]
+var currAnswer;
+var gotCorrect = false;
+var paperToDestroy;
+var previousCheckpoint = 0;
+var random;
+var confirmButton;
+var newItem;
 
 var startButton;
 var mysteryBox;
-var player;
-var land;
 var graphics;
 var playing = false;
+var content;
 
 var playerGroup;
 var obstacleGroup;
@@ -35,6 +37,7 @@ var itemGroup;
 var uiGroup;
 var factMenuGroup;
 var quizMenuGroup;
+var boxGroup;
 
 var upperBound = HEIGHT / 2 - HEIGHT / 3;
 var lowerBound = upperBound + HEIGHT;
@@ -44,21 +47,36 @@ var lowerLine;
 var roomLines = [];
 var papers = [];
 var obstacles = [];
-var obstacleTypes = ['crab', 'oil', 'bag', 'spongebob', 'tire', 'trash'];
+var evolutionTypes = ['clown','beluga', 'dolphin','blacktip','mako', 'hammerhead','greatwhite', 'killer'];
+var evolutionHats = ['clownhat','belugahat', 'dolphinhat','blacktiphat','makohat', 'hammerheadhat','greatwhitehat', 'killerhat'];
+var obstacleTypes = ['oil', 'bag', 'tire', 'trash'];
+var evolution = ['animatedFish', 'clown', 'crab', 'octopus', 'dolphin', 'greatwhite', 'killer']
 
 var factMenu = {};
 var quizMenu = {};
+var boxMenu = {};
 
 var Player = function(game, x, y, rot) {
     this.game = game;
     this.x = x;
     this.y = y;
+    this.evolveNum = 0;
     this.sprite = game.add.sprite(x, y, 'animatedFish');
     this.sprite.width = 100;
     this.sprite.height = 50;
     this.sprite.rotation = rot;
     this.sprite.animations.add('animation', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
     this.sprite.play('animation');
+
+    Player.prototype.evolveFish = function() {
+        this.evolveNum++;
+        var oldX = this.sprite.x;
+        var oldY = this.sprite.y;
+        this.sprite.kill();
+        this.sprite = this.game.add.sprite(oldX, oldY, evolution[this.evolveNum]);
+        this.sprite.width = 100;
+        this.sprite.height = 50;
+    }
 
     Player.prototype.update = function() {
         this.checkMovement();
@@ -80,7 +98,7 @@ var Player = function(game, x, y, rot) {
                 this.sprite.x += movement;
             }
         }
-   } 
+    } 
 }
 
 var Obstacle = function(game, x, y, rot) {
@@ -132,12 +150,35 @@ function preload() {
     game.load.image('crab', 'assets/Crab.png');
     game.load.image('tire', 'assets/tire.png');
     game.load.image('trash', 'assets/trash.png');
+    game.load.image('octopus', 'assets/octopus.png');
+    game.load.image('dolphin', 'assets/dolphin.png');
+    game.load.image('hammerhead', 'assets/hammerhead.png');
     game.load.spritesheet('start', 'assets/start2.png', 120, 40); 
     game.load.spritesheet('mystery', 'assets/chest.png', 48, 38);
     game.load.image('paper', 'assets/paper.png');
     game.load.image('spongebob', 'assets/spongebob.png');
-    game.load.spritesheet('water', 'assets/water.png', 32, 400, 32)
+    game.load.spritesheet('water', 'assets/water.png', 32, 400, 32);
+    game.load.spritesheet('confirm','assets/confirm.png',109,29);
     game.load.bitmapFont('font', 'assets/font.png', 'assets/font.fnt');
+    game.load.image('beluga', 'assets/beluga.png');
+    game.load.image('blacktip', 'assets/blacktip-shark.png');
+    game.load.image('clown', 'assets/clownfish.png');
+    game.load.image('dolphin', 'assets/dolphin.png');
+    game.load.image('greatwhite', 'assets/greatwhite.png');
+    game.load.image('hammerhead', 'assets/hammerhead.png');
+    game.load.image('killer', 'assets/killerwhale.png');
+    game.load.image('mako', 'assets/mako.png');
+    game.load.image('octopus', 'assets/octopus.png');
+    game.load.image('belugahat', 'assets/belugahat.png');
+    game.load.image('blacktiphat', 'assets/blacktip-sharkhat.png');
+    game.load.image('clownhat', 'assets/clownfishhat.png');
+    game.load.image('dolphinhat', 'assets/dolphinhat.png');
+    game.load.image('greatwhitehat', 'assets/greatwhitehat.png');
+    game.load.image('hammerheadhat', 'assets/hammerheadhat.png');
+    game.load.image('killerhat', 'assets/killerwhalehat.png');
+    game.load.image('makohat', 'assets/makohat.png');
+    game.load.image('octopushat', 'assets/octopushat.png');
+    game.load.image('newitem', 'assets/newitem.png');
 }
 
 function create() {
@@ -188,6 +229,7 @@ function createLayers() {
     uiGroup = game.add.group();
     factMenuGroup = game.add.group();
     quizMenuGroup = game.add.group();
+    boxGroup = game.add.group();
 
     game.world.bringToTop(obstacleGroup);
     game.world.bringToTop(itemGroup);
@@ -195,9 +237,11 @@ function createLayers() {
     game.world.bringToTop(uiGroup);
     game.world.bringToTop(factMenuGroup);
     game.world.bringToTop(quizMenuGroup);
+    game.world.bringToTop(boxGroup);
 
     factMenuGroup.visible = false;
     quizMenuGroup.visible = false;
+    boxGroup.visible = false;
 }
 
 function createBorderLines(graphics) {
@@ -209,11 +253,12 @@ function createBorderLines(graphics) {
 }
 
 function createRoomLines(graphics) {
-    var i = 0;
+    var i = roomWidth;
     while (i < WIDTH) {
         graphics.moveTo(i, upperBound);
         graphics.lineTo(i, lowerBound);
 
+        roomLines.push(i);
         i += roomWidth;
     }
     graphics.endFill();
@@ -222,7 +267,8 @@ function createRoomLines(graphics) {
 function createPapers() {
     var i = roomWidth;
     while (i < WIDTH) {
-        var paperSprite = game.add.sprite(i - 100, (lowerBound - upperBound) / 2, 'paper');
+        var yVal = getRandBetween(upperBound + 100, lowerBound - 200);
+        var paperSprite = game.add.sprite(i - 100, yVal, 'paper');
         paperSprite.width = 50;
         paperSprite.height = 50;
         papers.push(paperSprite);
@@ -230,6 +276,12 @@ function createPapers() {
 
         i += roomWidth;
     }
+    var paperSprite = game.add.sprite(i - 100, (lowerBound - upperBound) / 2, 'paper');
+    paperSprite.y = (lowerBound - upperBound) / 2 + paperSprite.height / 2;
+    paperSprite.width = 50;
+    paperSprite.height = 50;
+    papers.push(paperSprite);
+    itemGroup.add(paperSprite);
 }
 
 function createObstacles() {
@@ -238,7 +290,7 @@ function createObstacles() {
         for (var i = 0; i < 4; i++) {
             var randX;
             while (true) {
-                randX = getRandIntBetween(count, count + roomWidth - 300);
+                randX = getRandIntBetween(count, count + roomWidth - 400);
                 var tooClose = false;
                 if (obstacles.length == 0) {
                     break;
@@ -270,6 +322,12 @@ function createFactMenu() {
     factMenu.background.y = game.camera.height * 0.125;
     factMenu.background.tint = "#000000";
 
+    factMenu.title = game.add.bitmapText(0, 0, 'font', 'Uh oh! You hit something bad!\nDid you know:');
+    factMenu.title.maxWidth = factMenu.background.width * 0.8;
+    factMenu.title.align = 'center';
+    factMenu.title.x = game.camera.width / 2 - factMenu.title.width / 2;
+    factMenu.title.y = factMenu.background.y + 50;
+
     factMenu.fact = game.add.bitmapText(0, 0, 'font', '1', 32);
     factMenu.fact.maxWidth = factMenu.background.width * 0.8;
     factMenu.fact.align = 'center';
@@ -277,8 +335,41 @@ function createFactMenu() {
     factMenu.fact.y = game.camera.height / 2 - factMenu.fact.height / 2;
     factMenu.fact.text = "";
 
+    factMenu.okay = game.add.bitmapText(0, 0, 'font', 'Okay', 32);
+    factMenu.okay.inputEnabled = true;
+    factMenu.okay.align = 'center';
+    factMenu.okay.x = game.camera.width / 2 - factMenu.okay.width / 2; 
+    factMenu.okay.y = factMenu.background.y + factMenu.background.height - 50;
+    factMenu.okay.input.useHandCursor = true;
+    factMenu.okay.events.onInputOver.add(function() {
+        factMenu.okay.tint = 0xff0000;
+    }, this);
+    factMenu.okay.events.onInputOut.add(function() {
+        factMenu.okay.tint = 0xffffff;
+    }, this);
+    factMenu.okay.events.onInputDown.add(function() {
+        playing = true;
+        factMenuGroup.visible = false;
+        for (var i = 0; i < obstacles.length; i++) {
+            obstacles[i].sprite.x = obstacles[i].x;
+            obstacles[i].sprite.y = obstacles[i].y;
+            obstacles[i].changeDirectionTime = game.time.now;
+            obstacles[i].moveUp = true;
+        }
+        if (gotCorrect) {
+            gotCorrect = false;
+            papers.splice(paperToDestroy, 1);
+            goNextRoom();
+            return;
+        }
+        player.sprite.x = previousCheckpoint;
+        player.sprite.y = HEIGHT / 2;
+    }, this);
+
     factMenuGroup.add(factMenu.background);
+    factMenuGroup.add(factMenu.title);
     factMenuGroup.add(factMenu.fact);
+    factMenuGroup.add(factMenu.okay);
 }
 
 function createQuizMenu() {
@@ -309,6 +400,7 @@ function createQuizMenu() {
         quizMenu.answer1.tint = 0xffffff;
     }, this);
     quizMenu.answer1.events.onInputDown.add(function() {
+        answerQuiz(1);
     }, this);
 
     quizMenu.answer2 = game.add.bitmapText(0, 0, 'font', '111111', 24);
@@ -325,6 +417,7 @@ function createQuizMenu() {
         quizMenu.answer2.tint = 0xffffff;
     }, this);
     quizMenu.answer2.events.onInputDown.add(function() {
+        answerQuiz(2);
     }, this);
 
     quizMenu.answer3 = game.add.bitmapText(0, 0, 'font', '111111', 24);
@@ -341,6 +434,7 @@ function createQuizMenu() {
         quizMenu.answer3.tint = 0xffffff;
     }, this);
     quizMenu.answer3.events.onInputDown.add(function() {
+        answerQuiz(3);
     }, this);
 
     quizMenu.answer4 = game.add.bitmapText(0, 0, 'font', '111111', 24);
@@ -357,6 +451,7 @@ function createQuizMenu() {
         quizMenu.answer4.tint = 0xffffff;
     }, this);
     quizMenu.answer4.events.onInputDown.add(function() {
+        answerQuiz(4);
     }, this);
 
     quizMenuGroup.add(quizMenu.background);
@@ -365,6 +460,30 @@ function createQuizMenu() {
     quizMenuGroup.add(quizMenu.answer2);
     quizMenuGroup.add(quizMenu.answer3);
     quizMenuGroup.add(quizMenu.answer4);
+}
+
+function answerQuiz(num) {
+    if (num == currAnswer) {
+        factMenu.fact.text = "Great job!\nYou can move on to the next zone!";
+        gotCorrect = true;
+    }
+    else {
+        factMenu.fact.text = "Sorry, that's not right...";
+        gotCorrect = false;
+    }
+    factMenu.background.width = game.camera.width * 0.75;
+    factMenu.background.height = game.camera.height * 0.75;
+    factMenu.background.x = game.camera.x + game.camera.width * 0.125;
+    factMenu.background.y = game.camera.y + game.camera.height * 0.125;
+    factMenu.title.text = "";
+    factMenu.title.x = game.camera.x + game.camera.width / 2 - factMenu.title.width / 2;
+    factMenu.title.y = factMenu.background.y + 50;
+    factMenu.fact.x = game.camera.x + game.camera.width / 2 - factMenu.fact.width / 2;
+    factMenu.fact.y = game.camera.y + game.camera.height / 2 - factMenu.fact.height / 2;
+    factMenu.okay.x = game.camera.x + game.camera.width / 2 - factMenu.okay.width / 2; 
+    factMenu.okay.y = factMenu.background.y + factMenu.background.height - 50;
+    factMenuGroup.visible = true;
+    quizMenuGroup.visible = false;
 }
 
 function update() {
@@ -383,7 +502,28 @@ function actionOnClick () {
 }
 
 function boxOpen(){
-    playing = true;
+    boxMenu.background = game.add.sprite(0, 0, 'white');
+    boxMenu.background.width = game.camera.width * 0.75;
+    boxMenu.background.height = game.camera.height * 0.75;
+    boxMenu.background.x = game.camera.width * 0.125;
+    boxMenu.background.y = game.camera.height * 0.125;
+    boxGroup.add(boxMenu.background);
+    boxGroup.visible = true;
+    mysteryBox.destroy();
+    newItem = game.add.sprite(game.camera.width/2-175,game.camera.height/2-300,'newitem');
+    content = game.add.sprite(game.camera.width/2,game.camera.height/2, evolutionHats[getRandIntBetween(0,8)]);
+    content.width = 400;
+    content.height = 300;
+    content.anchor.set(0.5,0.5);
+    confirmButton = game.add.button(game.camera.width/2,game.camera.height/2+165,'confirm',confirmClick, 3,2,3);
+    confirmButton.anchor.set(0.5,0.5);
+}
+
+function confirmClick(){
+    confirmButton.destroy();
+    content.destroy();
+    newItem.destroy();
+    boxGroup.visible = false;
 }
 function updateCollisions() {
     var xPos = player.sprite.x;
@@ -401,22 +541,99 @@ function updateCollisions() {
         player.sprite.y = lowerBound - player.sprite.height;
     }
 
-    handlePapers();
-    handleObstacles();
+    if (playing) {
+        handlePapers();
+        handleObstacles();
+        handleRoomLines();
+    }
 }
 function handlePapers() {
     for (var i = 0; i < papers.length; i++) {
         if (isRectangleCollision(player.sprite.x, player.sprite.y, player.sprite.width, player.sprite.height, papers[i].x, papers[i].y, papers[i].width, papers[i].height)) {
-            console.log("hi");
+            var randQuiz = quizzes[getRandIntBetween(0, quizzes.length)];
+            var paperToDestroy = i;
+
+            quizMenu.answer1.text = "";
+            quizMenu.answer2.text = "";
+            quizMenu.answer3.text = "";
+            quizMenu.answer4.text = "";
+
+            quizMenu.question.text = randQuiz.question;
+            quizMenu.answer1.text = randQuiz.answers[0];
+            quizMenu.answer2.text = randQuiz.answers[1];
+            quizMenu.answer3.text = randQuiz.answers[2];
+            if (quizMenu.length > 3)
+                quizMenu.answer4.text = randQuiz.answers[3];
+
+            currAnswer = randQuiz.answer;
+
+            quizMenu.background.x = game.camera.x + game.camera.width * 0.125;
+            quizMenu.background.y = game.camera.y + game.camera.height * 0.125;
+            quizMenu.question.x = game.camera.x + game.camera.width / 2 - quizMenu.question.width / 2;
+            quizMenu.question.y = quizMenu.background.y + 50;
+            quizMenu.answer1.x = game.camera.x + game.camera.width / 2 - quizMenu.answer1.width / 2;
+            quizMenu.answer1.y = quizMenu.background.y + quizMenu.background.height - 20 - 4 * (quizMenu.answer1.height + 40); 
+            quizMenu.answer2.x = game.camera.x + game.camera.width / 2 - quizMenu.answer2.width / 2;
+            quizMenu.answer2.y = quizMenu.background.y + quizMenu.background.height - 20 - 3 * (quizMenu.answer2.height + 40); 
+            quizMenu.answer3.x = game.camera.x + game.camera.width / 2 - quizMenu.answer3.width / 2;
+            quizMenu.answer3.y = quizMenu.background.y + quizMenu.background.height - 20 - 2 * (quizMenu.answer3.height + 40); 
+            quizMenu.answer4.x = game.camera.x + game.camera.width / 2 - quizMenu.answer4.width / 2;
+            quizMenu.answer4.y = quizMenu.background.y + quizMenu.background.height - 20 - 1 * (quizMenu.answer4.height + 40); 
+
+            if (papers.length == 1) {
+                quizMenu.question.text = "You made it! You are the king of the ocean.\nHelp your other fish grow by eliminating waste and recycling!";
+                quizMenu.question.y = quizMenu.background.y + quizMenu.background.height / 2 - quizMenu.question.height / 2;
+                quizMenu.answer1.text = "";
+                quizMenu.answer2.text = "";
+                quizMenu.answer3.text = "";
+                quizMenu.answer4.text = "";
+            }
+
+            playing = false;
+            quizMenuGroup.visible = true;
         }
     }
 }
 function handleObstacles() {
     for (var i = 0; i < obstacles.length; i++) {
         if (isRectangleCollision(player.sprite.x, player.sprite.y, player.sprite.width, player.sprite.height, obstacles[i].sprite.x, obstacles[i].sprite.y, obstacles[i].sprite.width, obstacles[i].sprite.height)) {
-            console.log("hi");
+            var randFact = facts[getRandIntBetween(0, facts.length)];
+
+            factMenu.background.width = game.camera.width * 0.75;
+            factMenu.background.height = game.camera.height * 0.75;
+            factMenu.background.x = game.camera.x + game.camera.width * 0.125;
+            factMenu.background.y = game.camera.y + game.camera.height * 0.125;
+            factMenu.title.text = "Uh oh! You hit something bad!\nDid you know:";
+            factMenu.title.x = game.camera.x + game.camera.width / 2 - factMenu.title.width / 2;
+            factMenu.title.y = factMenu.background.y + 50;
+            factMenu.fact.text = randFact;
+            factMenu.fact.x = game.camera.x + game.camera.width / 2 - factMenu.fact.width / 2;
+            factMenu.fact.y = game.camera.y + game.camera.height / 2 - factMenu.fact.height / 2;
+            factMenu.okay.x = game.camera.x + game.camera.width / 2 - factMenu.okay.width / 2; 
+            factMenu.okay.y = factMenu.background.y + factMenu.background.height - 50;
+
+            playing = false;
+            factMenuGroup.visible = true;
         }
     }
+}
+
+function handleRoomLines() {
+    if (player.sprite.x >= roomLines[0] - player.sprite.width) {
+        player.sprite.x = roomLines[0] - player.sprite.width;
+    }
+}
+
+function goNextRoom() {
+    graphics.lineStyle(5, 0x00ff00, 1);
+    graphics.moveTo(roomLines[0], upperBound);
+    graphics.lineTo(roomLines[0], lowerBound);
+    graphics.endFill();
+    previousCheckpoint = roomLines[0];
+    roomLines.splice(0, 1);
+    player.evolveFish();
+    playerGroup.add(player.sprite);
+    game.camera.follow(player.sprite);
 }
 
 function render() {
@@ -434,5 +651,4 @@ function isRectangleCollision(x1, y1, w1, h1, x2, y2, w2, h2) {
         return true;
     }
     return false;
-    // return (Math.abs(x1 - x2) * 2 < (w1 + w2)) && (Math.abs(y1 - y2) * 2 < (h1 + h2));
 }
