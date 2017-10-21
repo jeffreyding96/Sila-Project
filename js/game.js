@@ -56,6 +56,15 @@ var factMenu = {};
 var quizMenu = {};
 var boxMenu = {};
 
+var quizIndex = 0;
+
+var points = 0;
+var scoreCounter;
+var logo;
+
+var music;
+var sound = {};
+
 var Player = function(game, x, y, rot) {
     this.game = game;
     this.x = x;
@@ -140,6 +149,7 @@ var Obstacle = function(game, x, y, rot) {
 }
 
 function preload() {
+    game.load.image('logo', 'assets/logo1.png');
     game.load.image('white', 'assets/white.png');
     game.load.image('earth', 'assets/light_sand.png');
     game.load.image('waterSprite', 'assets/waterSprite.png');
@@ -179,6 +189,13 @@ function preload() {
     game.load.image('makohat', 'assets/makohat.png');
     game.load.image('octopushat', 'assets/octopushat.png');
     game.load.image('newitem', 'assets/newitem.png');
+    game.load.audio('kirbymusic', 'assets/kirby_underwater.mp3');
+    game.load.audio('underwater', 'assets/underwater.mp3');
+    game.load.audio('chatter', 'assets/dolphinchatter.mp3');
+    game.load.audio('hmm', 'assets/hmm.mp3');
+    game.load.audio('zing', 'assets/zing.mp3');
+    game.load.audio('bleh', 'assets/bleh.mp3');
+    game.load.audio('aww', 'assets/aww.mp3');
 }
 
 function create() {
@@ -192,9 +209,35 @@ function create() {
         e.preventDefault();
     };
 
+    music = game.add.audio('underwater');
+    music.loop = true;
+    music.play();
+
+    sound.chatter = game.add.audio('chatter');
+    sound.hmm = game.add.audio('hmm');
+    sound.hmm.volume += 2;
+    sound.bleh = game.add.audio('bleh');
+    sound.zing = game.add.audio('zing');
+    sound.aww = game.add.audio('aww');
+    sound.aww.volume += 5;
+
     player = new Player(game, 0, HEIGHT / 2, 0);
     playerGroup.add(player.sprite);
     game.camera.follow(player.sprite);
+
+    logo = game.add.sprite(0, 0, 'logo');
+    logo.fixedToCamera = true;
+    logo.cameraOffset.x = 20;
+    logo.cameraOffset.y = 15;
+    logo.width = 100;
+    logo.height = 100;
+    uiGroup.add(logo);
+
+    scoreCounter = game.add.bitmapText(0, 0, 'font', '0', 48);
+    scoreCounter.fixedToCamera = true;
+    scoreCounter.cameraOffset.x = game.camera.width / 2 - scoreCounter.width / 2;
+    scoreCounter.cameraOffset.y = 20;
+    uiGroup.add(scoreCounter);
 
     graphics = game.add.graphics(0, 0);
     graphics.lineStyle(5, 0xffffff, 1);
@@ -359,6 +402,7 @@ function createFactMenu() {
         if (gotCorrect) {
             gotCorrect = false;
             papers.splice(paperToDestroy, 1);
+            points += 5;
             goNextRoom();
             return;
         }
@@ -464,10 +508,13 @@ function createQuizMenu() {
 
 function answerQuiz(num) {
     if (num == currAnswer) {
+        quizIndex++;
+        sound.zing.play();
         factMenu.fact.text = "Great job!\nYou can move on to the next zone!";
         gotCorrect = true;
     }
     else {
+        sound.aww.play();
         factMenu.fact.text = "Sorry, that's not right...";
         gotCorrect = false;
     }
@@ -493,6 +540,8 @@ function update() {
     for (var i = 0; i < obstacles.length; i++) {
         obstacles[i].update();
     }
+
+    scoreCounter.text = points;
 }
 
 function actionOnClick () {
@@ -550,7 +599,8 @@ function updateCollisions() {
 function handlePapers() {
     for (var i = 0; i < papers.length; i++) {
         if (isRectangleCollision(player.sprite.x, player.sprite.y, player.sprite.width, player.sprite.height, papers[i].x, papers[i].y, papers[i].width, papers[i].height)) {
-            var randQuiz = quizzes[getRandIntBetween(0, quizzes.length)];
+            // var randQuiz = quizzes[getRandIntBetween(0, quizzes.length)];
+            var randQuiz = quizzes[quizIndex % quizzes.length];
             var paperToDestroy = i;
 
             quizMenu.answer1.text = "";
@@ -591,6 +641,8 @@ function handlePapers() {
 
             playing = false;
             quizMenuGroup.visible = true;
+
+            sound.hmm.play();
         }
     }
 }
@@ -614,6 +666,11 @@ function handleObstacles() {
 
             playing = false;
             factMenuGroup.visible = true;
+
+            points -= 2;
+
+            sound.chatter.play();
+            // sound.bleh.play();
         }
     }
 }
@@ -637,6 +694,7 @@ function goNextRoom() {
 }
 
 function render() {
+
 }
 
 function getRandBetween(x, y) {
